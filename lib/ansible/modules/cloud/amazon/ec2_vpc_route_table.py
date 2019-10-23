@@ -414,6 +414,8 @@ def get_route_table_by_tags(connection, module, vpc_id, tags):
 def route_spec_matches_route(route_spec, route):
     if route_spec.get('GatewayId') and 'nat-' in route_spec['GatewayId']:
         route_spec['NatGatewayId'] = route_spec.pop('GatewayId')
+    if route_spec.get('GatewayId') and 'tgw-' in route_spec['GatewayId']:
+        route_spec['TransitGatewayId'] = route_spec.pop('GatewayId')
     if route_spec.get('GatewayId') and 'vpce-' in route_spec['GatewayId']:
         if route_spec.get('DestinationCidrBlock', '').startswith('pl-'):
             route_spec['DestinationPrefixListId'] = route_spec.pop('DestinationCidrBlock')
@@ -625,6 +627,8 @@ def create_route_spec(connection, module, vpc_id):
             route_spec['gateway_id'] = igw
         if route_spec.get('gateway_id') and route_spec['gateway_id'].startswith('nat-'):
             rename_key(route_spec, 'gateway_id', 'nat_gateway_id')
+        if route_spec.get('gateway_id') and route_spec['gateway_id'].startswith('tgw-'):
+            rename_key(route_spec, 'gateway_id', 'transit_gateway_id')
 
     return snake_dict_to_camel_dict(routes, capitalize_first=True)
 
